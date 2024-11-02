@@ -3,7 +3,6 @@ package goprotoc
 import (
 	"archive/zip"
 	"bytes"
-	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -366,7 +365,7 @@ func executePlugin(req *plugins.CodeGenRequest, resp *plugins.CodeGenResponse, p
 		// otherwise, assume plugin program name by convention
 		pluginName = "protoc-gen-" + lang
 	}
-	return plugins.Exec(context.Background(), pluginName, req, resp)
+	return plugins.Exec(exec.Command(pluginName), req, resp)
 }
 
 func driveProtocAsPlugin(req *plugins.CodeGenRequest, resp *plugins.CodeGenResponse, lang string) (err error) {

@@ -2,13 +2,11 @@ package plugins
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
-	"path"
 	"strings"
 
 	"github.com/jhump/protoreflect/desc"
@@ -19,13 +17,10 @@ import (
 
 // Exec executes the protoc plugin at the given path, sending it the given
 // request and adding its generated code output to the given response.
-func Exec(ctx context.Context, pluginPath string, req *CodeGenRequest, resp *CodeGenResponse) error {
+func Exec(cmd *exec.Cmd, req *CodeGenRequest, resp *CodeGenResponse) error {
 	if len(req.Files) == 0 {
 		return fmt.Errorf("nothing to generate: no files given")
 	}
-
-	ctx, cancel := context.WithCancel(ctx)
-	defer cancel()
 
 	reqpb := toPbRequest(req)
 	reqBytes, err := proto.Marshal(reqpb)
@@ -33,9 +28,8 @@ func Exec(ctx context.Context, pluginPath string, req *CodeGenRequest, resp *Cod
 		return fmt.Errorf("failed to marshal code gen request to bytes: %v", err)
 	}
 
-	pluginName := pluginName(path.Base(pluginPath))
+	pluginName := strings.Join(cmd.Args, " ")
 
-	cmd := exec.CommandContext(ctx, pluginPath)
 	cmd.Stderr = os.Stderr
 	cmd.Stdin = bytes.NewReader(reqBytes)
 
