@@ -16,7 +16,7 @@
 // re-parse all of the source code.
 package main
 
-import "github.com/jhump/goprotoc/app/goprotoc"
+import "github.com/duckbrain/goprotoc/internal/goprotoc"
 
 func main() {
 	goprotoc.Main()

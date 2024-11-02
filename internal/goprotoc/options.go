@@ -3,7 +3,7 @@ package goprotoc
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"strings"
 )
@@ -20,6 +20,7 @@ type protocOptions struct {
 	printFreeFieldNumbers bool
 	pluginDefs            map[string]string
 	output                map[string]string
+	pluginOpts            map[string]string
 	protoFiles            []string
 }
 
@@ -182,7 +183,7 @@ func parseFlags(source string, programName string, args []string, stdout io.Writ
 					return err
 				}
 				source := a[1:]
-				contents, err := ioutil.ReadFile(source)
+				contents, err := os.ReadFile(source)
 				if err != nil {
 					return fmt.Errorf("%scould not load option file %s: %v", loc(), source, err)
 				}
@@ -202,6 +203,15 @@ func parseFlags(source string, programName string, args []string, stdout io.Writ
 					opts.output = make(map[string]string, 1)
 				}
 				opts.output[parts[0][2:len(parts[0])-4]] = value
+			case strings.HasPrefix(parts[0], "--") && strings.HasSuffix(parts[0], "_opt"):
+				value, err := getOptionArg()
+				if err != nil {
+					return err
+				}
+				if opts.pluginOpts == nil {
+					opts.pluginOpts = make(map[string]string, 1)
+				}
+				opts.pluginOpts[parts[0][2:len(parts[0])-4]] = value
 			default:
 				return fmt.Errorf("%sunrecognized option: %s", loc(), parts[0])
 			}

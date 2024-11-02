@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"strings"
 
@@ -33,7 +32,7 @@ func Main() {
 
 // Run runs the program and returns the exit code.
 func Run(args []string, stdin io.Reader, stdout io.Writer, stderr io.Writer) int {
-	if err := run(args, stdin, stdout, stderr); err != nil {
+	if err := run(args, stdin, stdout); err != nil {
 		message := err.Error()
 		if message == "" {
 			message = "unexpected error"
@@ -44,7 +43,7 @@ func Run(args []string, stdin io.Reader, stdout io.Writer, stderr io.Writer) int
 	return 0
 }
 
-func run(args []string, stdin io.Reader, stdout io.Writer, stderr io.Writer) error {
+func run(args []string, stdin io.Reader, stdout io.Writer) error {
 	var opts protocOptions
 	if err := parseFlags("", args[0], args[1:], stdout, &opts, map[string]struct{}{}); err != nil {
 		switch err {
@@ -235,7 +234,7 @@ Parse PROTO_FILES and generate output based on the options given:
 func loadDescriptors(descFileNames []string, inputProtoFiles []string) ([]*desc.FileDescriptor, error) {
 	allFiles := map[string]*descriptorpb.FileDescriptorProto{}
 	for _, fileName := range descFileNames {
-		d, err := ioutil.ReadFile(fileName)
+		d, err := os.ReadFile(fileName)
 		if err != nil {
 			return nil, err
 		}
@@ -318,7 +317,7 @@ func saveDescriptor(dest string, fds []*desc.FileDescriptor, includeImports, inc
 	if err != nil {
 		return err
 	}
-	return ioutil.WriteFile(dest, b, 0666)
+	return os.WriteFile(dest, b, 0666)
 }
 
 func toFileDescriptorSet(alreadySeen, fileNames map[string]struct{}, fdSet *descriptorpb.FileDescriptorSet, fd *desc.FileDescriptor, includeImports, includeSourceInfo bool) {
