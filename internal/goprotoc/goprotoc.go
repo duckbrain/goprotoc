@@ -133,7 +133,7 @@ func run(args []string, stdin io.Reader, stdout io.Writer) error {
 			return errors.New("Missing output directives.")
 		}
 		if len(opts.output) > 0 {
-			err = doCodeGen(opts.output, fds, opts.pluginDefs)
+			err = doCodeGen(opts.output, fds, opts.pluginDefs, opts.pluginOpts)
 		}
 		if err == nil && opts.outputDescriptor != "" {
 			err = saveDescriptor(opts.outputDescriptor, fds, opts.includeImports, opts.includeSourceInfo)

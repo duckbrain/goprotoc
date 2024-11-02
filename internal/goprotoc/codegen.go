@@ -69,13 +69,13 @@ func (f outputFile) String() string {
 	return fmt.Sprintf("%s:%s", f.loc.path, f.fileName)
 }
 
-func doCodeGen(outputs map[string]string, fds []*desc.FileDescriptor, pluginDefs map[string]string) error {
+func doCodeGen(outputs map[string]string, fds []*desc.FileDescriptor, pluginDefs, pluginOpts map[string]string) error {
 	locations, args, err := computeOutputLocations(outputs)
 	if err != nil {
 		return err
 	}
 
-	resps, err := runPlugins(args, fds, pluginDefs)
+	resps, err := runPlugins(args, fds, pluginDefs, pluginOpts)
 	if err != nil {
 		return err
 	}
@@ -170,14 +170,18 @@ func computeOutputLocations(outputs map[string]string) (map[string]outputLocatio
 	return locations, args, nil
 }
 
-func runPlugins(args map[string]string, fds []*desc.FileDescriptor, pluginDefs map[string]string) (map[string]*plugins.CodeGenResponse, error) {
-	req := plugins.CodeGenRequest{
-		Files:         fds,
-		ProtocVersion: protocVersionStruct,
-	}
+func runPlugins(args map[string]string, fds []*desc.FileDescriptor, pluginDefs, pluginOpts map[string]string) (map[string]*plugins.CodeGenResponse, error) {
 	resps := map[string]*plugins.CodeGenResponse{}
 
 	for lang, arg := range args {
+		req := plugins.CodeGenRequest{
+			Files:         fds,
+			ProtocVersion: protocVersionStruct,
+		}
+		opt, ok := pluginOpts[lang]
+		if ok {
+			req.Args = []string{opt} // TODO: How do multiple opts work?
+		}
 		resp := plugins.NewCodeGenResponse(lang, nil)
 		resps[lang] = resp
 		pluginName := pluginDefs[lang]
