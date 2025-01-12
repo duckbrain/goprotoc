@@ -30,5 +30,8 @@ func main() {
 	goprotoc.RegisterPlugin("go_grpc", func(req *plugins.CodeGenRequest, res *plugins.CodeGenResponse) error {
 		return plugins.Exec(exec.Command("go", "run", "google.golang.org/grpc/cmd/protoc-gen-go-grpc"), req, res)
 	})
+	goprotoc.RegisterPlugin("gogo", func(req *plugins.CodeGenRequest, res *plugins.CodeGenResponse) error {
+		return plugins.Exec(exec.Command("go", "run", "github.com/gogo/protobuf/protoc-gen-gogo"), req, res)
+	})
 	goprotoc.Main()
 }
